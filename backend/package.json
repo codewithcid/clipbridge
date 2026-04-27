@@ -1,0 +1,28 @@
+{
+  "name": "clipbridge-backend",
+  "version": "1.0.0",
+  "description": "ClipBridge backend – cross-device clipboard sharing",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage --coverageReporters=html --coverageReporters=text",
+    "migrate": "node -e \"require('./src/db').runMigrations().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1)})\"",
+    "seed": "node -e \"require('./src/db').runSeed().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1)})\""
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
+  }
+}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClipBridge</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@600;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       AUTH MODAL
+  ═══════════════════════════════════════════ -->
+  <div id="auth-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Sign in to ClipBridge">
+    <div class="modal">
+      <div class="modal-brand">
+        <span class="brand-accent">Clip</span>Bridge
+      </div>
+      <p class="modal-tagline">Cross-device clipboard sharing — one 4-digit ID.</p>
+
+      <!-- Tab switchers -->
+      <div class="auth-tabs" role="tablist">
+        <button class="tab-btn active" role="tab" data-tab="login" aria-selected="true">Sign In</button>
+        <button class="tab-btn"        role="tab" data-tab="register" aria-selected="false">Register</button>
+        <button class="tab-btn"        role="tab" data-tab="guest" aria-selected="false">Guest</button>
+      </div>
+
+      <!-- Sign In -->
+      <div id="tab-login" class="tab-panel active">
+        <form id="form-login" novalidate>
+          <label class="field-label" for="login-username">Username</label>
+          <input id="login-username" type="text" class="input" placeholder="alice" autocomplete="username" required />
+
+          <label class="field-label" for="login-password">Password</label>
+          <input id="login-password" type="password" class="input" placeholder="••••••••" autocomplete="current-password" required />
+
+          <button type="submit" class="btn btn-primary">Sign In</button>
+          <p id="login-error" class="form-error" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- Register -->
+      <div id="tab-register" class="tab-panel">
+        <form id="form-register" novalidate>
+          <label class="field-label" for="reg-username">Username</label>
+          <input id="reg-username" type="text" class="input" placeholder="newuser" autocomplete="username" required />
+
+          <label class="field-label" for="reg-password">Password <span class="hint">(min 6 chars)</span></label>
+          <input id="reg-password" type="password" class="input" placeholder="••••••••" autocomplete="new-password" required />
+
+          <button type="submit" class="btn btn-primary">Register</button>
+          <p id="reg-error" class="form-error" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- Guest -->
+      <div id="tab-guest" class="tab-panel">
+        <p class="guest-blurb">Get a temporary 4-digit ID instantly — no account needed.</p>
+        <button id="btn-guest" class="btn btn-primary">Continue as Guest</button>
+        <p id="guest-error" class="form-error" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN APP  (hidden until authenticated)
+  ═══════════════════════════════════════════ -->
+  <div id="app" class="app hidden">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <span class="topbar-brand"><span class="brand-accent">Clip</span>Bridge</span>
+      <div class="topbar-id-pill" id="topbar-id" title="Your permanent ID">
+        <span class="pill-hash">#</span><span id="topbar-id-number">—</span>
+      </div>
+      <div id="ws-indicator" class="ws-dot ws-disconnected" title="Real-time connection status"></div>
+    </header>
+
+    <!-- Main navigation tabs -->
+    <nav class="main-tabs" role="tablist">
+      <button class="main-tab-btn active" role="tab" data-panel="panel-send"    aria-selected="true">Send</button>
+      <button class="main-tab-btn"        role="tab" data-panel="panel-receive" aria-selected="false">
+        Receive
+        <span id="inbox-badge" class="badge hidden">0</span>
+      </button>
+      <button class="main-tab-btn"        role="tab" data-panel="panel-account" aria-selected="false">Account</button>
+    </nav>
+
+    <!-- ── SEND TAB ── -->
+    <section id="panel-send" class="panel active" aria-label="Send a message">
+      <h2 class="panel-title">Send a Clip</h2>
+
+      <form id="form-send" novalidate>
+        <label class="field-label" for="send-to">Recipient ID</label>
+        <div class="id-input-wrap">
+          <span class="id-hash">#</span>
+          <input
+            id="send-to"
+            type="number"
+            class="input id-input"
+            placeholder="1234"
+            min="1000"
+            max="9999"
+            maxlength="4"
+            inputmode="numeric"
+            autocomplete="off"
+            aria-describedby="recipient-hint"
+          />
+        </div>
+        <p id="recipient-hint" class="hint-line" aria-live="polite"></p>
+
+        <label class="field-label" for="send-text">
+          Message
+          <span id="char-count" class="char-count">0 / 10000</span>
+        </label>
+        <textarea
+          id="send-text"
+          class="input textarea"
+          placeholder="Paste or type your content here…"
+          rows="6"
+          maxlength="10000"
+        ></textarea>
+
+        <button type="submit" id="btn-send" class="btn btn-primary">Send</button>
+      </form>
+
+      <!-- Quick self-send -->
+      <div class="self-send-box">
+        <h3 class="subsection-title">Quick Self-Send</h3>
+        <textarea
+          id="self-send-text"
+          class="input textarea"
+          placeholder="Save a note to yourself…"
+          rows="3"
+        ></textarea>
+        <button id="btn-self-send" class="btn btn-ghost">Save to My Inbox</button>
+      </div>
+    </section>
+
+    <!-- ── RECEIVE TAB ── -->
+    <section id="panel-receive" class="panel hidden" aria-label="Inbox">
+      <h2 class="panel-title">Inbox <span class="inbox-count" id="inbox-count"></span></h2>
+      <div id="inbox-list" class="inbox-list">
+        <p class="empty-state">No messages yet — share your ID to receive clips.</p>
+      </div>
+    </section>
+
+    <!-- ── ACCOUNT TAB ── -->
+    <section id="panel-account" class="panel hidden" aria-label="Account">
+      <h2 class="panel-title">Account</h2>
+
+      <div class="account-id-card">
+        <p class="account-id-label">Your ClipBridge ID</p>
+        <div class="account-id-big" id="account-id-display">—</div>
+        <span class="mode-badge" id="mode-badge">—</span>
+      </div>
+
+      <h3 class="subsection-title">Recent Sends</h3>
+      <ul id="send-history" class="send-history-list">
+        <li class="empty-state">Nothing sent yet.</li>
+      </ul>
+
+      <button id="btn-signout" class="btn btn-danger">Sign Out</button>
+    </section>
+
+  </div><!-- /app -->
+
+  <!-- Toast container -->
+  <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

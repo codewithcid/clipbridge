@@ -1,0 +1,13 @@
+{
+  "name": "clipbridge",
+  "version": "1.0.0",
+  "description": "Root entry point – delegates to backend",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev":   "nodemon backend/src/server.js",
+    "install:all": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

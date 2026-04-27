@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ClipBridge Backend (dev)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 4000,
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "name": "ClipBridge Backend (prod)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "port": 4000,
+      "cwd": "${workspaceFolder}/backend"
+    }
+  ]
+}

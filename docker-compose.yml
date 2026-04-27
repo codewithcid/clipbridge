@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  # ── PostgreSQL ─────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       clipbridge
+      POSTGRES_USER:     clipbridge
+      POSTGRES_PASSWORD: clipbridge
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clipbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Test database (separate DB for integration tests) ──
+  postgres_test:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       clipbridge_test
+      POSTGRES_USER:     clipbridge
+      POSTGRES_PASSWORD: clipbridge
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clipbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend ────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://clipbridge:clipbridge@postgres:5432/clipbridge
+      JWT_SECRET:   change_me_to_a_long_random_string
+      PORT:         4000
+      NODE_ENV:     production
+    ports:
+      - "4000:4000"
+
+volumes:
+  pg_data:
