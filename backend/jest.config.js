@@ -5,7 +5,8 @@ module.exports = {
   globalSetup: './tests/setup.js',
   collectCoverageFrom: [
     'src/**/*.js',
-    '!src/server.js',
+    '!src/server.js',  // entry point – not unit-testable
+    '!src/ws.js',      // WebSocket server – requires live WS connections; covered by E2E
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['html', 'text', 'lcov'],
