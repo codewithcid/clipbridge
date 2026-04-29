@@ -8,8 +8,17 @@ if (process.env.NODE_ENV !== 'test') {
   require('dotenv').config();
 }
 
+// Render (and most cloud PG providers) require SSL for external connections.
+// We enable it whenever the DATABASE_URL contains a remote host, but allow
+// self-signed certs so local Docker setups still work without extra config.
+const isRemoteDb =
+  process.env.DATABASE_URL &&
+  !process.env.DATABASE_URL.includes('localhost') &&
+  !process.env.DATABASE_URL.includes('127.0.0.1');
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: isRemoteDb ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('error', (err) => {
