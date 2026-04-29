@@ -103,24 +103,28 @@ describe('Login', () => {
 
   it('ID persists after sign-out and re-login', () => {
     // Login
-    cy.get('#login-username').type(username);
-    cy.get('#login-password').type(password);
+    cy.get('#login-username').clear().type(username);
+    cy.get('#login-password').clear().type(password);
     cy.get('#form-login button[type="submit"]').click();
-    cy.get('#app').should('not.have.class', 'hidden');
+    cy.get('#app', { timeout: 8000 }).should('not.have.class', 'hidden');
 
-    // Sign out
+    // Sign out — causes a full page reload
     cy.get('[data-panel="panel-account"]').click();
     cy.get('#btn-signout').click();
-    cy.get('#auth-overlay').should('be.visible');
 
-    // Login again
-    cy.get('#login-username').type(username);
-    cy.get('#login-password').type(password);
+    // After reload the auth modal must be visible again
+    cy.get('#auth-overlay', { timeout: 8000 }).should('not.have.class', 'hidden');
+
+    // Login again with the same credentials
+    cy.get('[data-tab="login"]').click();
+    cy.get('#login-username', { timeout: 5000 }).should('be.visible').clear().type(username);
+    cy.get('#login-password').clear().type(password);
     cy.get('#form-login button[type="submit"]').click();
 
-    // Same ID
-    cy.get('#topbar-id-number').invoke('text').then((idText) => {
-      expect(parseInt(idText, 10)).to.eq(savedId);
+    // Must get back the exact same ID (retry until the dash placeholder is replaced)
+    cy.get('#topbar-id-number', { timeout: 8000 }).should(($el) => {
+      const id = parseInt($el.text(), 10);
+      expect(id).to.eq(savedId);
     });
   });
 });

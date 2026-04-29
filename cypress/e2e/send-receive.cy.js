@@ -36,7 +36,11 @@ describe('Send & Receive via WebSocket', () => {
     });
     cy.reload();
 
-    cy.get('#app', { timeout: 5000 }).should('not.have.class', 'hidden');
+    cy.get('#app', { timeout: 8000 }).should('not.have.class', 'hidden');
+
+    // Wait for the WebSocket dot to turn green before we send anything
+    cy.get('#ws-indicator', { timeout: 12000 }).should('have.class', 'ws-connected');
+
     cy.get('[data-panel="panel-receive"]').click();
 
     // Note the current inbox length
@@ -51,8 +55,8 @@ describe('Send & Receive via WebSocket', () => {
         body: { to: receiverId, text: MESSAGE_TEXT },
       });
 
-      // ── Verify the receiver's inbox updates within 2 s (WS push) ─────────
-      cy.get('.message-card', { timeout: 2000 }).should('have.length.gte', initialCount + 1);
+      // ── Verify WS push delivers the card (10 s budget for free-tier latency) ──
+      cy.get('.message-card', { timeout: 10000 }).should('have.length.gte', initialCount + 1);
       cy.get('.message-text').should('contain', MESSAGE_TEXT);
     });
   });

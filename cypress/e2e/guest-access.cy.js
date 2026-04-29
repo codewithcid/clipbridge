@@ -30,7 +30,7 @@ describe('Guest access', () => {
     cy.get('#btn-guest').click();
 
     // Auth overlay hides, app appears
-    cy.get('#auth-overlay').should('not.exist').or('have.class', 'hidden');
+    cy.get('#auth-overlay').should('have.class', 'hidden');
     cy.get('#app').should('not.have.class', 'hidden');
 
     // ID is in guest range

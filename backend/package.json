@@ -7,6 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --runInBand",
+    "test:unit": "jest tests/unit --no-coverage --verbose",
+    "test:integration": "jest tests/integration --no-coverage --verbose --runInBand",
     "test:coverage": "jest --runInBand --coverage --coverageReporters=html --coverageReporters=text",
     "migrate": "node -e \"require('./src/db').runMigrations().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1)})\"",
     "seed": "node -e \"require('./src/db').runSeed().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1)})\""
