@@ -23,6 +23,20 @@ const frontendPath = process.env.FRONTEND_PATH
 
 app.use(express.static(frontendPath));
 
+// Flipped once migrations + seed succeed; see prepareDatabase() below.
+let dbReady = false;
+
+// ── Health check ────────────────────────────────────────────────────────────
+// Always answers, even while the database is still coming up, so uptime
+// pingers can keep the free instance warm.
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    db: dbReady ? 'ready' : 'connecting',
+    uptime: Math.round(process.uptime()),
+  });
+});
+
 // ── API routes ──────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
@@ -40,25 +54,51 @@ app.use((err, req, res, next) => {
 });
 
 // ── Bootstrap ───────────────────────────────────────────────────────────────
-async function start() {
-  await runMigrations();
-  await runSeed();
 
+const RETRY_MIN_MS = 5_000;
+const RETRY_MAX_MS = 60_000;
+
+/**
+ * Run migrations + seed, retrying forever with a capped backoff.
+ *
+ * Deliberately never exits the process: a database that is unreachable,
+ * asleep, or still provisioning should degrade the API, not take the whole
+ * service down and leave visitors on a 503.
+ */
+async function prepareDatabase() {
+  let delay = RETRY_MIN_MS;
+
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await runMigrations();
+      await runSeed();
+      dbReady = true;
+      console.log('Database ready.');
+      return;
+    } catch (err) {
+      console.error(`Database unavailable (attempt ${attempt}): ${err.message}`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay = Math.min(delay * 2, RETRY_MAX_MS);
+    }
+  }
+}
+
+function start() {
   const httpServer = http.createServer(app);
   attachWebSocketServer(httpServer);
 
   const PORT = process.env.PORT || 4000;
   httpServer.listen(PORT, () => {
-    console.log(`ClipBridge backend listening on http://localhost:${PORT}`);
+    console.log(`ClipBridge backend listening on port ${PORT}`);
   });
+
+  // Connect in the background — the server is already accepting requests.
+  prepareDatabase();
 }
 
 // Only auto-start when run directly (not when required by tests)
 if (require.main === module) {
-  start().catch((err) => {
-    console.error('Failed to start:', err);
-    process.exit(1);
-  });
+  start();
 }
 
 module.exports = app;
