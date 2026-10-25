@@ -29,6 +29,7 @@
         <button class="tab-btn active" role="tab" data-tab="login" aria-selected="true">Sign In</button>
         <button class="tab-btn"        role="tab" data-tab="register" aria-selected="false">Register</button>
         <button class="tab-btn"        role="tab" data-tab="guest" aria-selected="false">Guest</button>
+        <button class="tab-btn"        role="tab" data-tab="how" aria-selected="false">How it works</button>
       </div>
 
       <!-- Sign In -->
@@ -65,6 +66,10 @@
         <button id="btn-guest" class="btn btn-primary">Continue as Guest</button>
         <p id="guest-error" class="form-error" aria-live="polite"></p>
       </div>
+      <div id="tab-how" class="tab-panel">
+        <h2 class="how-title">How it works</h2>
+        <div class="how-steps-host"></div>
+      </div>
     </div>
   </div>
 
@@ -90,6 +95,7 @@
         <span id="inbox-badge" class="badge hidden">0</span>
       </button>
       <button class="main-tab-btn"        role="tab" data-panel="panel-account" aria-selected="false">Account</button>
+      <button class="main-tab-btn"        role="tab" data-panel="panel-how" aria-selected="false">How it works</button>
     </nav>
 
     <!-- ── SEND TAB ── -->
@@ -169,7 +175,21 @@
       <button id="btn-signout" class="btn btn-danger">Sign Out</button>
     </section>
 
+    <section id="panel-how" class="panel hidden" aria-label="How it works">
+      <h2 class="panel-title">How it works</h2>
+      <p class="how-intro">A short ID connects your devices. Paste a clip, choose a recipient, and see it arrive in real time.</p>
+      <div class="how-steps-host"></div>
+    </section>
   </div><!-- /app -->
+
+  <template id="how-steps-template">
+    <ol class="how-steps">
+      <li><span class="how-number">01</span><div><h3>Get your ID</h3><p>Register for a permanent four-digit ID, or choose Guest for a temporary one. Sign-in gives your browser a session token for your inbox.</p></div></li>
+      <li><span class="how-number">02</span><div><h3>Paste and send</h3><p>Enter the other device's ID and paste your text. Send over HTTPS, or use Quick Self-Send to save a note to your own inbox.</p></div></li>
+      <li><span class="how-number">03</span><div><h3>Deliver in real time</h3><p>The server saves the clip in PostgreSQL and pushes it to the recipient's connected browser through a WebSocket. An offline recipient can fetch their inbox later.</p></div></li>
+      <li><span class="how-number">04</span><div><h3>Receive and copy</h3><p>Open Receive on the other device and copy the clip. The app shares text you explicitly send; it does not watch your system clipboard.</p></div></li>
+    </ol>
+  </template>
 
   <!-- Toast container -->
   <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>

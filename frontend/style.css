@@ -48,6 +48,20 @@ body {
 
 /* ── Utilities ──────────────────────────────────────────── */
 .hidden { display: none !important; }
+.modal { max-height: 90svh; overflow-y: auto; }
+.how-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; margin-bottom: 1rem; }
+.how-intro { color: var(--text-muted); margin-bottom: 1.5rem; }
+.how-steps { list-style: none; display: grid; gap: 1.2rem; }
+.how-steps li { display: flex; gap: .9rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.how-steps li:last-child { border-bottom: 0; padding-bottom: 0; }
+.how-number { color: var(--accent); font-size: .8rem; padding-top: .2rem; }
+.how-steps h3 { font-family: 'Syne', sans-serif; font-size: .95rem; margin-bottom: .35rem; }
+.how-steps p { color: var(--text-muted); font-size: .78rem; line-height: 1.75; }
+.auth-tabs .tab-btn { font-size: .7rem; padding: .5rem .3rem; }
+.main-tabs { flex-wrap: wrap; }
+.modal:has(#tab-how.active) { max-width: 760px; }
+#tab-how .how-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+@media (max-width: 600px) { #tab-how .how-steps { grid-template-columns: 1fr; } }
 
 /* ── Overlay (auth modal backdrop) ─────────────────────── */
 .overlay {

@@ -448,6 +448,10 @@ function escapeAttr(str) {
 
 // ── Bootstrap ────────────────────────────────────────────
 function init() {
+  const howTemplate = document.getElementById('how-steps-template');
+  document.querySelectorAll('.how-steps-host').forEach((host) => {
+    host.appendChild(howTemplate.content.cloneNode(true));
+  });
   initAuthTabs();
   initMainTabs();
 
